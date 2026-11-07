@@ -2,21 +2,14 @@
 
 A custom, manual Retrieval-Augmented Generation (RAG) implementation built from scratch without high-level frameworks like LangChain. This application processes PDF documents, builds a vector index locally using Meta's FAISS, and performs semantic search to answer interactive queries via the Groq LLM API.
 
-## System Architecture
-
-```mermaid
-flowchart TD
-    A[📄 PDF Input Document] --> B[⚙️ pdf_utils.py]
-    B -->|Extracts & Chunks Text| C[🔍 search.py]
-    C -->|FAISS Vector Indexing & Search| D[🤖 rag.py]
-    D -->|Groq API / Llama 3.3| E[💬 Terminal Output / AI Response]
-```
-
 ## How It Works
 
 * **`pdf_utils.py`**: Extracts raw text using `pypdf` and breaks it into overlapping text chunks.
+
 * **`search.py`**: Converts text chunks into numerical vectors using `sentence-transformers` (`all-MiniLM-L6-v2`) and performs fast L2 similarity search with `faiss-cpu`.
+
 * **`rag.py`**: Combines the user query with top matching PDF chunks into a prompt and fetches the answer via Groq API (`llama-3.3-70b-versatile`).
+
 * **`main.py`**: Runs the interactive terminal chat loop.
 
 ## Setup
