@@ -1,28 +1,29 @@
 import os
 from groq import Groq
 
-def generate_answer(query, retrieved_chunks):
-    client = Groq(api_key=os.environ.get("GROQ_API_KEY"))
+def generate_answer(query, context_chunks):
+    api_key = os.environ.get("GROQ_API_KEY")
+    if not api_key:
+        raise ValueError("GROQ_API_KEY environment variable is missing.")
 
-    context = "\n\n".join(retrieved_chunks)
+    client = Groq(api_key=api_key)
 
-    prompt = f"""You are a helpful assistant. Answer the user's question using ONLY the provided context below. 
-If the answer cannot be found in the context, state clearly that the information is not available in the document.
+    context_text = "\n\n".join(context_chunks)
+
+    prompt = f"""You are a helpful assistant. Use the following context from the document to answer the question.
 
 Context:
-{context}
+{context_text}
 
-Question:
-{query}
-
+Question: {query}
 Answer:"""
 
     response = client.chat.completions.create(
-        model="llama-3.3-70b-versatile",
+        model="openai/gpt-oss-120b",
         messages=[
             {"role": "user", "content": prompt}
         ],
-        temperature=0.2
+        temperature=0.2,
     )
 
     return response.choices[0].message.content

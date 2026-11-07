@@ -1,24 +1,22 @@
+import logging
 from pypdf import PdfReader
 
-def parse_pdf(path, chunk_words=350, overlap=50):
+logging.getLogger("pypdf").setLevel(logging.ERROR)
 
-    reader = PdfReader(path)
+def extract_text_from_pdf(pdf_path):
+    reader = PdfReader(pdf_path)
     text = ""
+    for idx, page in enumerate(reader.pages):
+        extracted = page.extract_text()
+        if extracted:
+            text += f"\n--- Page {idx + 1} ---\n" + extracted
+    return text
 
-    # Stores pages in text string
-    for page in reader.pages:
-        t = page.extract_text()
-        if t:
-            text += t + "\n"
-
-    # Splits text into chunks of 350 words with 50 words repeated on each chunk to avoid overlap
+def chunk_text(text, chunk_size=1000, overlap=150):
     words = text.split()
     chunks = []
-    step = chunk_words - overlap
-
-    for i in range(0, len(words), step):
-        chunks.append(" ".join(words[i:i + chunk_words]))
-        if i + chunk_words >= len(words):
-            break
-
+    for i in range(0, len(words), chunk_size - overlap):
+        chunk = " ".join(words[i:i + chunk_size])
+        if len(chunk) > 50:
+            chunks.append(chunk)
     return chunks

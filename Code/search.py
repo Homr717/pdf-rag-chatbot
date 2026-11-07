@@ -18,14 +18,13 @@ def build_vector_index(chunks):
 
     return index
 
-def search_top_chunks(query, index, original_chunks, top_k=3):
+def search_top_chunks(query, index, original_chunks, top_k=6):
     """
     Converts user's query into a vector and finds top_k nearest text chunks.
     """
     query_vector = model.encode([query], convert_to_numpy=True)
 
     distances, indices = index.search(query_vector, top_k)
-
 
     matched_chunks = [original_chunks[i] for i in indices[0] if i < len(original_chunks)]
 
