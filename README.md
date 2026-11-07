@@ -1,61 +1,39 @@
-# PDF RAG Chatbot
+# PDF RAG Chatbot (Custom Vector Search)
 
 A custom, manual Retrieval-Augmented Generation (RAG) implementation built from scratch without high-level frameworks like LangChain. This application processes PDF documents, builds a vector index locally using Meta's FAISS, and performs semantic search to answer interactive queries via the Groq LLM API.
-## Project Structure
-
-pdf-rag-chatbot/
-└── pdf-rag-chatbot/
-    ├── pdf_utils.py
-    ├── search.py
-    ├── rag.py
-    ├── main.py
-    ├── .gitignore
-    ├── requirements.txt
-    └── README.md
-
 
 ## System Architecture
 
-                      ┌─────────────────────────┐
-                      │    PDF Input Document   │
-                      └────────────┬────────────┘
-                                   │
-                                   ▼
-┌──────────────────────────────────────────────────────────────────────┐
-│ pdf_utils.py                                                         │
-│  - Extracts raw text using pypdf                                     │
-│  - Splits text into manageable, overlapping chunks                   │
-└──────────────────────────────────┬───────────────────────────────────┘
-                                   │
-                                   ▼
-┌──────────────────────────────────────────────────────────────────────┐
-│ search.py                                                            │
-│  - Generates embeddings with sentence-transformers (all-MiniLM-L6-v2) │
-│  - Stores coordinates in a local Meta FAISS vector index             │
-│  - Runs vector similarity search to retrieve Top-K relevant chunks   │
-└──────────────────────────────────┬───────────────────────────────────┘
-                                   │
-                                   ▼
-┌──────────────────────────────────────────────────────────────────────┐
-│ rag.py                                                               │
-│  - Combines user query + Top-K PDF chunks into a context prompt      │
-│  - Sends payload via HTTPS to Groq Cloud API                         │
-│  - Generates answer using llama-3.3-70b-versatile                     │
-└──────────────────────────────────┬───────────────────────────────────┘
-                                   │
-                                   ▼
-                      ┌─────────────────────────┐
-                      │   Terminal Output / AI  │
-                      └─────────────────────────┘
+```mermaid
+flowchart TD
+    A[📄 PDF Input Document] --> B[⚙️ pdf_utils.py]
+    B -->|Extracts & Chunks Text| C[🔍 search.py]
+    C -->|FAISS Vector Indexing & Search| D[🤖 rag.py]
+    D -->|Groq API / Llama 3.3| E[💬 Terminal Output / AI Response]
+```
+
+## How It Works
+
+* **`pdf_utils.py`**: Extracts raw text using `pypdf` and breaks it into overlapping text chunks.
+* **`search.py`**: Converts text chunks into numerical vectors using `sentence-transformers` (`all-MiniLM-L6-v2`) and performs fast L2 similarity search with `faiss-cpu`.
+* **`rag.py`**: Combines the user query with top matching PDF chunks into a prompt and fetches the answer via Groq API (`llama-3.3-70b-versatile`).
+* **`main.py`**: Runs the interactive terminal chat loop.
+
 ## Setup
 
 1. Install dependencies:
+```bash
 pip install -r requirements.txt
+```
 
 2. Set your Groq API key:
+```bash
 export GROQ_API_KEY="your_api_key_here"
+```
 
 ## Usage
 
 Run the main application script:
-python pdf-rag-chatbot/main.py
+```bash
+python main.py
+```
